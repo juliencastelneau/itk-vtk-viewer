@@ -18,7 +18,7 @@ function applyStyle(el, style) {
 
 const createViewer = (
   rootContainer,
-  { image, geometries, pointSets, use2D = false, rotate = true, viewerStyle, viewerState }
+  { image, mask, geometries, pointSets, use2D = true, rotate = false, viewerStyle, viewerState }
 ) => {
   UserInterface.emptyContainer(rootContainer);
 

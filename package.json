@@ -48,6 +48,7 @@
     "tap-spec": "^5.0.0",
     "tape": "^4.8.0",
     "tape-catch": "^1.0.6",
+    "webpack-cli": "^3.3.9",
     "webpack-dev-server": "^3.1.14",
     "webpackbar": "^3.1.5",
     "workbox-build": "^2.1.2",

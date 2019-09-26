@@ -127,14 +127,21 @@ const processFiles = (container, { files, use2D }) => {
             }).map(({ data }) => data)
         const any3D  = ! dataSets.map(({ is3D }) => is3D).every((is3D) => !is3D)
         const is3D = any3D && !use2D;
-        resolve(
-          createViewer(container, {
-            image,
-            geometries,
-            pointSets,
-            use2D: !is3D,
-          })
-        );
+        console.log('promise : ', image);
+        resolve({
+          image: image,
+          geometries: geometries,
+          pointSets: pointSets,
+          use2D: !is3D
+        });
+        // resolve(
+        //   createViewer(container, {
+        //     image,
+        //     geometries,
+        //     pointSets,
+        //     use2D: !is3D,
+        //   })
+        // );
       })
       })
     });

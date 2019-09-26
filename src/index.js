@@ -7,6 +7,7 @@ import processFiles from './processFiles';
 import UserInterface from './UserInterface';
 import createFileDragAndDrop from './UserInterface/createFileDragAndDrop';
 import style from './UserInterface/ItkVtkViewer.module.css';
+import createViewer from './createViewer';
 
 let doNotInitViewers = false;
 
@@ -15,17 +16,41 @@ export function createViewerFromLocalFiles(container) {
   createFileDragAndDrop(container, processFiles);
 }
 
-export function createViewerFromUrl(el, url, use2D = false) {
+export function createViewerFromUrl(el, url, url2, use2D = false) {
   UserInterface.emptyContainer(el);
   const progressCallback = UserInterface.createLoadingProgress(el);
-
   return fetchBinaryContent(url, progressCallback).then((arrayBuffer) => {
     const file = new File(
       [new Blob([arrayBuffer])],
       url.split('/').slice(-1)[0]
     );
-    return processFiles(el, { files: [file], use2D });
-  });
+    console.log('file : ', file);
+    return new Promise((resolve, reject) => {
+      processFiles(el, { files: [file], use2D }).then( ({image: imageData, geometries: geometries, pointSets: pointSets, use2D: use2D }) => {
+      console.log('imageData : ', imageData);
+      return fetchBinaryContent(url2, progressCallback).then((arrayBuffer2) => {
+        const mask = new File(
+          [new Blob([arrayBuffer2])],
+          url2.split('/').slice(-1)[0]
+        );
+        console.log('mask : ', mask);
+        resolve(
+          processFiles(el, { files: [mask], use2D }).then( ({image: maskData, geometries: geometries, pointSets: pointSets, use2D: use2D }) => {
+          
+            resolve(
+              createViewer(el, {
+                image: imageData,
+                mask: maskData,
+                use2D: use2D,
+              })         
+            );
+          })        
+        );
+    
+      })
+    })
+    })
+  })
 }
 
 export function initializeEmbeddedViewers() {
@@ -71,7 +96,8 @@ export function initializeEmbeddedViewers() {
 export function processParameters(
   container,
   addOnParameters = {},
-  keyName = 'fileToLoad'
+  keyName = 'fileToLoad',
+  keyName2 = 'maskToLoad'
 ) {
   const userParams = Object.assign(
     {},
@@ -84,10 +110,13 @@ export function processParameters(
     myContainer.classList.add(style.fullscreenContainer);
   }
 
-  if (userParams[keyName]) {
+  var fileToLoad = userParams[keyName];
+  var maskToLoad = userParams[keyName2];
+  if (fileToLoad) {
     return createViewerFromUrl(
       myContainer,
-      userParams[keyName],
+      fileToLoad,
+      maskToLoad,
       !!userParams.use2D
     );
   }
